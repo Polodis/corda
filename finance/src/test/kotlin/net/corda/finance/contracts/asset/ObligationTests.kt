@@ -34,8 +34,24 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class ObligationTests {
-    companion object {
-        private val DUMMY_OBLIGATION_ISSUER = TestIdentity(CordaX500Name("Snake Oil Issuer", "London", "GB"), 10).party
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val charlie = TestIdentity(CordaX500Name("Charlie Ltd", "Athens", "GR"), 90)
+        val dummyNotary = TestIdentity(CordaX500Name("Notary Service", "Zurich", "CH"), 20)
+        val DUMMY_OBLIGATION_ISSUER = TestIdentity(CordaX500Name("Snake Oil Issuer", "London", "GB"), 10).party
+        val megaCorp = TestIdentity(CordaX500Name("MegaCorp", "London", "GB"))
+        val miniCorp = TestIdentity(CordaX500Name("MiniCorp", "London", "GB"))
+        val ALICE get() = alice.party
+        val ALICE_PUBKEY get() = alice.pubkey
+        val BOB get() = bob.party
+        val BOB_PUBKEY get() = bob.pubkey
+        val CHARLIE get() = charlie.party
+        val DUMMY_NOTARY get() = dummyNotary.party
+        val MEGA_CORP get() = megaCorp.party
+        val MEGA_CORP_PUBKEY get() = megaCorp.pubkey
+        val MINI_CORP get() = miniCorp.party
+        val MINI_CORP_PUBKEY get() = miniCorp.pubkey
     }
 
     @Rule
@@ -59,8 +75,8 @@ class ObligationTests {
             beneficiary = CHARLIE
     )
     private val outState = inState.copy(beneficiary = AnonymousParty(BOB_PUBKEY))
-    private val miniCorpServices = MockServices(listOf("net.corda.finance.contracts.asset"), rigorousMock(), MINI_CORP.name, MINI_CORP_KEY)
-    private val notaryServices = MockServices(rigorousMock(), MEGA_CORP.name, DUMMY_NOTARY_KEY)
+    private val miniCorpServices = MockServices(listOf("net.corda.finance.contracts.asset"), rigorousMock(), miniCorp)
+    private val notaryServices = MockServices(rigorousMock(), MEGA_CORP.name, dummyNotary.key)
     private val identityService = rigorousMock<IdentityServiceInternal>().also {
         doReturn(null).whenever(it).partyFromKey(ALICE_PUBKEY)
         doReturn(null).whenever(it).partyFromKey(BOB_PUBKEY)

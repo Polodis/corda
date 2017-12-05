@@ -32,6 +32,17 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 
 class NodeInterestRatesTest {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val DUMMY_NOTARY = TestIdentity(DUMMY_NOTARY_NAME, 20).party
+        val megaCorp = TestIdentity(CordaX500Name("MegaCorp", "London", "GB"))
+        val ALICE get() = alice.party
+        val ALICE_NAME get() = alice.name
+        val ALICE_PUBKEY get() = alice.pubkey
+        val BOB_NAME get() = bob.name
+    }
+
     @Rule
     @JvmField
     val testSerialization = SerializationEnvironmentRule()
@@ -44,7 +55,7 @@ class NodeInterestRatesTest {
         EURIBOR 2016-03-15 2M = 0.111
         """.trimIndent())
     private val dummyCashIssuer = TestIdentity(CordaX500Name("Cash issuer", "London", "GB"))
-    private val services = MockServices(listOf("net.corda.finance.contracts.asset"), rigorousMock(), dummyCashIssuer, MEGA_CORP_KEY)
+    private val services = MockServices(listOf("net.corda.finance.contracts.asset"), rigorousMock(), dummyCashIssuer, megaCorp.key)
     // This is safe because MockServices only ever have a single identity
     private val identity = services.myInfo.singleIdentity()
 

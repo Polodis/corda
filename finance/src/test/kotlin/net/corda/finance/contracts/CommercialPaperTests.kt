@@ -40,6 +40,9 @@ interface ICommercialPaperTestTemplate {
     fun getContract(): ContractClassName
 }
 
+private val megaCorp = TestIdentity(CordaX500Name("MegaCorp", "London", "GB"))
+private val MEGA_CORP get() = megaCorp.party
+
 class JavaCommercialPaperTest : ICommercialPaperTestTemplate {
     override fun getPaper(): ICommercialPaperState = JavaCommercialPaper.State(
             MEGA_CORP.ref(123),
@@ -92,6 +95,21 @@ class CommercialPaperTestsGeneric {
         private val dummyCashIssuer = TestIdentity(CordaX500Name("Snake Oil Issuer", "London", "GB"), 10)
         private val DUMMY_CASH_ISSUER_IDENTITY get() = dummyCashIssuer.identity
         private val DUMMY_CASH_ISSUER = dummyCashIssuer.ref(1)
+        private val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        private val bigCorp = TestIdentity(CordaX500Name("BigCorporation", "New York", "US"))
+        private val miniCorp = TestIdentity(CordaX500Name("MiniCorp", "London", "GB"))
+        private val dummyNotary = TestIdentity(CordaX500Name("Notary Service", "Zurich", "CH"), 20)
+        private val ALICE get() = alice.party
+        private val ALICE_KEY get() = alice.key
+        private val ALICE_PUBKEY get() = alice.pubkey
+        private val BIG_CORP_KEY get() = bigCorp.key
+        private val MEGA_CORP_PUBKEY get() = megaCorp.pubkey
+        private val MEGA_CORP_IDENTITY get() = megaCorp.identity
+        private val MINI_CORP get() = miniCorp.party
+        private val MINI_CORP_PUBKEY get() = miniCorp.pubkey
+        private val MINI_CORP_IDENTITY get() = miniCorp.identity
+        private val DUMMY_NOTARY get() = dummyNotary.party
+        private val DUMMY_NOTARY_IDENTITY get() = dummyNotary.identity
     }
 
     @Parameterized.Parameter
@@ -240,7 +258,7 @@ class CommercialPaperTestsGeneric {
     private lateinit var aliceServices: MockServices
     private lateinit var aliceVaultService: VaultService
     private lateinit var alicesVault: Vault<ContractState>
-    private val notaryServices = MockServices(rigorousMock(), MEGA_CORP.name, DUMMY_NOTARY_KEY)
+    private val notaryServices = MockServices(rigorousMock(), MEGA_CORP.name, dummyNotary.key)
     private val issuerServices = MockServices(listOf("net.corda.finance.contracts"), rigorousMock(), MEGA_CORP.name, dummyCashIssuer.key)
     private lateinit var moveTX: SignedTransaction
     @Test
@@ -255,7 +273,7 @@ class CommercialPaperTestsGeneric {
         aliceVaultService = aliceServices.vaultService
 
         databaseAlice.transaction {
-            alicesVault = VaultFiller(aliceServices, DUMMY_NOTARY, DUMMY_NOTARY_KEY, rngFactory = ::Random).fillWithSomeTestCash(9000.DOLLARS, issuerServices, 1, DUMMY_CASH_ISSUER)
+            alicesVault = VaultFiller(aliceServices, dummyNotary, rngFactory = ::Random).fillWithSomeTestCash(9000.DOLLARS, issuerServices, 1, DUMMY_CASH_ISSUER)
             aliceVaultService = aliceServices.vaultService
         }
         val bigCorpDatabaseAndServices = makeTestDatabaseAndMockServices(
@@ -268,7 +286,7 @@ class CommercialPaperTestsGeneric {
         bigCorpVaultService = bigCorpServices.vaultService
 
         databaseBigCorp.transaction {
-            bigCorpVault = VaultFiller(bigCorpServices, DUMMY_NOTARY, DUMMY_NOTARY_KEY, rngFactory = ::Random).fillWithSomeTestCash(13000.DOLLARS, issuerServices, 1, DUMMY_CASH_ISSUER)
+            bigCorpVault = VaultFiller(bigCorpServices, dummyNotary, rngFactory = ::Random).fillWithSomeTestCash(13000.DOLLARS, issuerServices, 1, DUMMY_CASH_ISSUER)
             bigCorpVaultService = bigCorpServices.vaultService
         }
 

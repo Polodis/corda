@@ -6,7 +6,6 @@ import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.TransactionState
 import net.corda.core.crypto.SecureHash
-import net.corda.core.crypto.entropyToKeyPair
 import net.corda.core.crypto.generateKeyPair
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.CordaX500Name
@@ -48,7 +47,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
 import org.junit.*
 import java.math.BigDecimal
-import java.math.BigInteger
 import java.time.Instant
 import java.util.*
 import javax.persistence.EntityManager
@@ -58,6 +56,16 @@ import javax.persistence.criteria.CriteriaBuilder
 class HibernateConfigurationTest {
     private companion object {
         val dummyCashIssuer = TestIdentity(CordaX500Name("Snake Oil Issuer", "London", "GB"), 10)
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val bankOfCorda = TestIdentity(CordaX500Name("BankOfCorda", "London", "GB"))
+        val charlie = TestIdentity(CordaX500Name("Charlie Ltd", "Athens", "GR"), 90)
+        val dummyNotary = TestIdentity(CordaX500Name("Notary Service", "Zurich", "CH"), 20)
+        val ALICE get() = alice.party
+        val BOB_NAME get() = bob.name
+        val BOC get() = bankOfCorda.party
+        val BOC_KEY get() = bankOfCorda.key
+        val CHARLIE get() = charlie.party
     }
 
     @Rule
@@ -91,12 +99,12 @@ class HibernateConfigurationTest {
         val cordappPackages = listOf("net.corda.testing.contracts", "net.corda.finance.contracts.asset")
         bankServices = MockServices(cordappPackages, rigorousMock(), BOC.name, BOC_KEY)
         issuerServices = MockServices(cordappPackages, rigorousMock(), dummyCashIssuer)
-        notaryServices = MockServices(cordappPackages, rigorousMock(), DUMMY_NOTARY.name, DUMMY_NOTARY_KEY)
+        notaryServices = MockServices(cordappPackages, rigorousMock(), dummyNotary)
         notary = notaryServices.myInfo.singleIdentity()
         val dataSourceProps = makeTestDataSourceProperties()
         val identityService = rigorousMock<IdentityService>().also { mock ->
             doReturn(null).whenever(mock).wellKnownPartyFromAnonymous(any<AbstractParty>())
-            listOf(dummyCashIssuer.party, DUMMY_NOTARY).forEach {
+            listOf(dummyCashIssuer.party, dummyNotary.party).forEach {
                 doReturn(it).whenever(mock).wellKnownPartyFromAnonymous(it)
                 doReturn(it).whenever(mock).wellKnownPartyFromX500Name(it.name)
             }
@@ -108,7 +116,7 @@ class HibernateConfigurationTest {
             // `consumeCash` expects we can self-notarise transactions
             services = object : MockServices(cordappPackages, rigorousMock<IdentityServiceInternal>().also {
                 doNothing().whenever(it).justVerifyAndRegisterIdentity(argThat { name == BOB_NAME })
-            }, BOB_NAME, generateKeyPair(), DUMMY_NOTARY_KEY) {
+            }, BOB_NAME, generateKeyPair(), dummyNotary.key) {
                 override val vaultService = makeVaultService(database.hibernateConfig, schemaService)
                 override fun recordTransactions(statesToRecord: StatesToRecord, txs: Iterable<SignedTransaction>) {
                     for (stx in txs) {
@@ -120,7 +128,7 @@ class HibernateConfigurationTest {
 
                 override fun jdbcSession() = database.createSession()
             }
-            vaultFiller = VaultFiller(services, DUMMY_NOTARY, DUMMY_NOTARY_KEY, notary, ::Random)
+            vaultFiller = VaultFiller(services, dummyNotary, notary, ::Random)
             hibernatePersister = services.hibernatePersister
         }
 

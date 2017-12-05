@@ -8,6 +8,7 @@ import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.crypto.random63BitValue
 import net.corda.core.flows.*
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.internal.FlowStateMachine
 import net.corda.core.internal.concurrent.flatMap
@@ -58,6 +59,13 @@ class FlowFrameworkTests {
         init {
             LogHelper.setLevel("+net.corda.flow")
         }
+
+        private val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        private val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        private val charlie = TestIdentity(CordaX500Name("Charlie Ltd", "Athens", "GR"), 90)
+        private val ALICE_NAME get() = alice.name
+        private val BOB_NAME get() = bob.name
+        private val CHARLIE_NAME get() = charlie.name
     }
 
     private lateinit var mockNet: MockNetwork

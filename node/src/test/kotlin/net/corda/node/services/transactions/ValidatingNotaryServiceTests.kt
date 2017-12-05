@@ -8,6 +8,7 @@ import net.corda.core.crypto.TransactionSignature
 import net.corda.core.flows.NotaryError
 import net.corda.core.flows.NotaryException
 import net.corda.core.flows.NotaryFlow
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.node.ServiceHub
 import net.corda.core.transactions.SignedTransaction
@@ -28,6 +29,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class ValidatingNotaryServiceTests {
+    private companion object {
+        val megaCorp = TestIdentity(CordaX500Name("MegaCorp", "London", "GB"))
+    }
+
     private lateinit var mockNet: MockNetwork
     private lateinit var notaryServices: StartedNodeServices
     private lateinit var aliceServices: StartedNodeServices
@@ -68,7 +73,7 @@ class ValidatingNotaryServiceTests {
 
     @Test
     fun `should report error for missing signatures`() {
-        val expectedMissingKey = MEGA_CORP_KEY.public
+        val expectedMissingKey = megaCorp.pubkey
         val stx = run {
             val inputState = issueState(aliceServices, alice)
 

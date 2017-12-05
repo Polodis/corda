@@ -3,6 +3,7 @@ package net.corda.node.services.statemachine
 import co.paralleluniverse.fibers.Suspendable
 import net.corda.core.crypto.SecureHash
 import net.corda.core.flows.*
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.internal.InputStreamAndHash
 import net.corda.core.internal.concurrent.transpose
 import net.corda.core.messaging.startFlow
@@ -21,6 +22,15 @@ import kotlin.test.assertEquals
  * transaction size limit (which should only consider the hashes).
  */
 class LargeTransactionsTest {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val DUMMY_NOTARY = TestIdentity(DUMMY_NOTARY_NAME, 20).party
+        val ALICE_NAME get() = alice.name
+        val BOB get() = bob.party
+        val BOB_NAME get() = bob.name
+    }
+
     @StartableByRPC
     @InitiatingFlow
     class SendLargeTransactionFlow(private val hash1: SecureHash,

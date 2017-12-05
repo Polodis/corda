@@ -1,9 +1,11 @@
 package net.corda.bank
 
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.messaging.startFlow
 import net.corda.core.node.services.Vault
 import net.corda.core.node.services.vault.QueryCriteria
+import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.getOrThrow
 import net.corda.finance.DOLLARS
 import net.corda.finance.contracts.asset.Cash
@@ -16,6 +18,13 @@ import net.corda.testing.driver.driver
 import org.junit.Test
 
 class BankOfCordaRPCClientTest {
+    private companion object {
+        val bigCorp = TestIdentity(CordaX500Name("BigCorporation", "New York", "US"))
+        val bankOfCorda = TestIdentity(CordaX500Name("BankOfCorda", "London", "GB"))
+        val BIGCORP_NAME get() = bigCorp.name
+        val BOC get() = bankOfCorda.party
+    }
+
     @Test
     fun `issuer flow via RPC`() {
         val commonPermissions = setOf(
@@ -52,7 +61,7 @@ class BankOfCordaRPCClientTest {
             // Kick-off actual Issuer Flow
             val anonymous = true
             bocProxy.startFlow(::CashIssueAndPaymentFlow,
-                    1000.DOLLARS, BIG_CORP_PARTY_REF,
+                    1000.DOLLARS, OpaqueBytes.of(1),
                     bigCorporation,
                     anonymous,
                     defaultNotaryIdentity).returnValue.getOrThrow()

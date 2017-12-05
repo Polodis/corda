@@ -1,5 +1,6 @@
 package net.corda.core.flows
 
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.getOrThrow
@@ -16,6 +17,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class FinalityFlowTests {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val charlie = TestIdentity(CordaX500Name("Charlie Ltd", "Athens", "GR"), 90)
+        val ALICE_NAME get() = alice.name
+        val BOB_NAME get() = bob.name
+        val CHARLIE get() = charlie.party
+    }
+
     private lateinit var mockNet: MockNetwork
     private lateinit var aliceServices: StartedNodeServices
     private lateinit var bobServices: StartedNodeServices

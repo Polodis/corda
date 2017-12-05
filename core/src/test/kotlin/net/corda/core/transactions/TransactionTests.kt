@@ -3,6 +3,7 @@ package net.corda.core.transactions
 import net.corda.core.contracts.*
 import net.corda.core.crypto.*
 import net.corda.core.crypto.CompositeKey
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.testing.*
 import net.corda.testing.contracts.DummyContract
@@ -20,6 +21,13 @@ class TransactionTests {
         val DUMMY_KEY_1 = generateKeyPair()
         val DUMMY_KEY_2 = generateKeyPair()
         val DUMMY_CASH_ISSUER_KEY = entropyToKeyPair(BigInteger.valueOf(10))
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val dummyNotary = TestIdentity(CordaX500Name("Notary Service", "Zurich", "CH"), 20)
+        val ALICE get() = alice.party
+        val BOB get() = bob.party
+        val DUMMY_NOTARY get() = dummyNotary.party
+        val DUMMY_NOTARY_KEY get() = dummyNotary.key
     }
 
     @Rule

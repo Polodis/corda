@@ -25,11 +25,9 @@ import java.time.Instant
 
 // A dummy time at which we will be pretending test transactions are created.
 val TEST_TX_TIME: Instant get() = Instant.parse("2015-04-17T12:00:00.00Z")
-val DUMMY_NOTARY_KEY: KeyPair by lazy { entropyToKeyPair(BigInteger.valueOf(20)) }
-/** Dummy notary identity for tests and simulations */
-val DUMMY_NOTARY_IDENTITY: PartyAndCertificate get() = getTestPartyAndCertificate(DUMMY_NOTARY)
-val DUMMY_NOTARY: Party get() = Party(CordaX500Name(organisation = "Notary Service", locality = "Zurich", country = "CH"), DUMMY_NOTARY_KEY.public)
-
+private val DUMMY_NOTARY_KEY: KeyPair by lazy { entropyToKeyPair(BigInteger.valueOf(20)) }
+val DUMMY_NOTARY_NAME = CordaX500Name("Notary Service", "Zurich", "CH")
+val DUMMY_NOTARY: Party get() = Party(DUMMY_NOTARY_NAME, DUMMY_NOTARY_KEY.public)
 val DUMMY_BANK_A_KEY: KeyPair by lazy { entropyToKeyPair(BigInteger.valueOf(40)) }
 /** Dummy bank identity for tests and simulations */
 val DUMMY_BANK_A: Party get() = Party(CordaX500Name(organisation = "Bank A", locality = "London", country = "GB"), DUMMY_BANK_A_KEY.public)
@@ -44,26 +42,13 @@ val DUMMY_BANK_C: Party get() = Party(CordaX500Name(organisation = "Bank C", loc
 
 val ALICE_KEY: KeyPair by lazy { entropyToKeyPair(BigInteger.valueOf(70)) }
 /** Dummy individual identity for tests and simulations */
-val ALICE_IDENTITY: PartyAndCertificate get() = getTestPartyAndCertificate(ALICE)
 val ALICE_NAME = CordaX500Name(organisation = "Alice Corp", locality = "Madrid", country = "ES")
 val ALICE: Party get() = Party(ALICE_NAME, ALICE_KEY.public)
 
 val BOB_KEY: KeyPair by lazy { entropyToKeyPair(BigInteger.valueOf(80)) }
 /** Dummy individual identity for tests and simulations */
-val BOB_IDENTITY: PartyAndCertificate get() = getTestPartyAndCertificate(BOB)
 val BOB_NAME = CordaX500Name(organisation = "Bob Plc", locality = "Rome", country = "IT")
 val BOB: Party get() = Party(BOB_NAME, BOB_KEY.public)
-
-val CHARLIE_KEY: KeyPair by lazy { entropyToKeyPair(BigInteger.valueOf(90)) }
-/** Dummy individual identity for tests and simulations */
-val CHARLIE_IDENTITY: PartyAndCertificate get() = getTestPartyAndCertificate(CHARLIE)
-val CHARLIE_NAME = CordaX500Name(organisation = "Charlie Ltd", locality = "Athens", country = "GR")
-val CHARLIE: Party get() = Party(CHARLIE_NAME, CHARLIE_KEY.public)
-
-val DUMMY_REGULATOR_KEY: KeyPair by lazy { entropyToKeyPair(BigInteger.valueOf(100)) }
-/** Dummy regulator for tests and simulations */
-val DUMMY_REGULATOR: Party get() = Party(CordaX500Name(organisation = "Regulator A", locality = "Paris", country = "FR"), DUMMY_REGULATOR_KEY.public)
-
 val DEV_CA: CertificateAndKeyPair by lazy {
     // TODO: Should be identity scheme
     val caKeyStore = loadKeyStore(ClassLoader.getSystemResourceAsStream("net/corda/node/internal/certificates/cordadevcakeys.jks"), "cordacadevpass")

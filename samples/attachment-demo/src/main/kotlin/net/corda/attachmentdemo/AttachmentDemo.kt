@@ -25,6 +25,7 @@ import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.DUMMY_BANK_B
 import net.corda.testing.DUMMY_NOTARY
+import net.corda.testing.DUMMY_NOTARY_NAME
 import net.corda.testing.internal.poll
 import java.io.InputStream
 import java.net.HttpURLConnection
@@ -88,7 +89,7 @@ fun sender(rpc: CordaRPCOps, numOfClearBytes: Int = 1024) { // default size 1K.
 private fun sender(rpc: CordaRPCOps, inputStream: InputStream, hash: SecureHash.SHA256, executor: ScheduledExecutorService) {
 
     // Get the identity key of the other side (the recipient).
-    val notaryFuture: CordaFuture<Party> = poll(executor, DUMMY_NOTARY.name.toString()) { rpc.wellKnownPartyFromX500Name(DUMMY_NOTARY.name) }
+    val notaryFuture: CordaFuture<Party> = poll(executor, DUMMY_NOTARY_NAME.toString()) { rpc.wellKnownPartyFromX500Name(DUMMY_NOTARY_NAME) }
     val otherSideFuture: CordaFuture<Party> = poll(executor, DUMMY_BANK_B.name.toString()) { rpc.wellKnownPartyFromX500Name(DUMMY_BANK_B.name) }
 
     // Make sure we have the file in storage

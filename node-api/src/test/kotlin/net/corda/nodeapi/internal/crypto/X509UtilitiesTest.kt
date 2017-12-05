@@ -17,10 +17,7 @@ import net.corda.nodeapi.internal.serialization.AllWhitelist
 import net.corda.nodeapi.internal.serialization.SerializationContextImpl
 import net.corda.nodeapi.internal.serialization.SerializationFactoryImpl
 import net.corda.nodeapi.internal.serialization.kryo.KryoHeaderV0_1
-import net.corda.testing.ALICE
-import net.corda.testing.BOB
-import net.corda.testing.BOB_PUBKEY
-import net.corda.testing.MEGA_CORP
+import net.corda.testing.*
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.asn1.x509.BasicConstraints
 import org.bouncycastle.asn1.x509.Extension
@@ -49,6 +46,16 @@ import kotlin.concurrent.thread
 import kotlin.test.*
 
 class X509UtilitiesTest {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val megaCorp = TestIdentity(CordaX500Name("MegaCorp", "London", "GB"))
+        val ALICE get() = alice.party
+        val BOB get() = bob.party
+        val BOB_PUBKEY get() = bob.pubkey
+        val MEGA_CORP get() = megaCorp.party
+    }
+
     @Rule
     @JvmField
     val tempFolder: TemporaryFolder = TemporaryFolder()

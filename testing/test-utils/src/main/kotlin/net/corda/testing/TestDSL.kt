@@ -16,7 +16,6 @@ import net.corda.testing.contracts.DummyContract
 import net.corda.testing.node.MockAttachmentStorage
 import net.corda.testing.node.MockCordappProvider
 import java.io.InputStream
-import java.security.KeyPair
 import java.security.PublicKey
 import java.util.*
 import kotlin.collections.component1
@@ -318,40 +317,3 @@ data class TestLedgerDSLInterpreter private constructor(
     val transactionsToVerify: List<WireTransaction> get() = transactionWithLocations.values.map { it.transaction }
     val transactionsUnverified: List<WireTransaction> get() = nonVerifiedTransactionWithLocations.values.map { it.transaction }
 }
-
-/**
- * Expands all [CompositeKey]s present in PublicKey iterable to set of single [PublicKey]s.
- * If an element of the set is a single PublicKey it gives just that key, if it is a [CompositeKey] it returns all leaf
- * keys for that composite element.
- */
-val Iterable<PublicKey>.expandedCompositeKeys: Set<PublicKey>
-    get() = flatMap { it.keys }.toSet()
-
-/**
- * Signs all transactions passed in.
- * @param transactionsToSign Transactions to be signed.
- * @param extraKeys extra keys to sign transactions with.
- * @return List of [SignedTransaction]s.
- */
-fun signAll(transactionsToSign: List<WireTransaction>, extraKeys: List<KeyPair>) = transactionsToSign.map { wtx ->
-    check(wtx.requiredSigningKeys.isNotEmpty())
-    val signatures = ArrayList<TransactionSignature>()
-    val keyLookup = HashMap<PublicKey, KeyPair>()
-
-    (ALL_TEST_KEYS + extraKeys).forEach {
-        keyLookup[it.public] = it
-    }
-    wtx.requiredSigningKeys.expandedCompositeKeys.forEach {
-        val key = keyLookup[it] ?: throw IllegalArgumentException("Missing required key for ${it.toStringShort()}")
-        signatures += key.sign(SignableData(wtx.id, SignatureMetadata(1, Crypto.findSignatureScheme(it).schemeNumberID)))
-    }
-    SignedTransaction(wtx, signatures)
-}
-
-/**
- * Signs all transactions in the ledger.
- * @param extraKeys extra keys to sign transactions with.
- * @return List of [SignedTransaction]s.
- */
-fun LedgerDSL<TestTransactionDSLInterpreter, TestLedgerDSLInterpreter>.signAll(
-        vararg extraKeys: KeyPair) = signAll(this.interpreter.wireTransactions, extraKeys.toList())

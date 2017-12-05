@@ -1,5 +1,6 @@
 package net.corda.finance.flows
 
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.getOrThrow
@@ -7,7 +8,7 @@ import net.corda.finance.DOLLARS
 import net.corda.finance.`issued by`
 import net.corda.finance.contracts.asset.Cash
 import net.corda.node.internal.StartedNode
-import net.corda.testing.BOC_NAME
+import net.corda.testing.TestIdentity
 import net.corda.testing.node.InMemoryMessagingNetwork.ServicePeerAllocationStrategy.RoundRobin
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.MockNetwork.MockNode
@@ -19,6 +20,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class CashIssueFlowTests {
+    private companion object {
+        val bankOfCorda = TestIdentity(CordaX500Name("BankOfCorda", "London", "GB"))
+        val BOC_NAME get() = bankOfCorda.name
+    }
+
     private lateinit var mockNet: MockNetwork
     private lateinit var bankOfCordaNode: StartedNode<MockNode>
     private lateinit var bankOfCorda: Party

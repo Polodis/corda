@@ -1,15 +1,16 @@
 package net.corda.testing.driver
 
 import net.corda.core.concurrent.CordaFuture
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.internal.div
 import net.corda.core.internal.list
 import net.corda.core.internal.readLines
 import net.corda.core.utilities.NetworkHostAndPort
 import net.corda.core.utilities.getOrThrow
 import net.corda.node.internal.NodeStartup
-import net.corda.testing.DUMMY_BANK_A
 import net.corda.testing.DUMMY_NOTARY
-import net.corda.testing.DUMMY_REGULATOR
+import net.corda.testing.DUMMY_NOTARY_NAME
+import net.corda.testing.TestIdentity
 import net.corda.testing.common.internal.ProjectStructure.projectRootDir
 import net.corda.testing.http.HttpApi
 import net.corda.testing.internal.addressMustBeBound
@@ -22,16 +23,19 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 
 class DriverTests {
-    companion object {
-        private val executorService: ScheduledExecutorService = Executors.newScheduledThreadPool(2)
-
-        private fun nodeMustBeUp(handleFuture: CordaFuture<out NodeHandle>) = handleFuture.getOrThrow().apply {
+    private companion object {
+        val dummyBankA = TestIdentity(CordaX500Name("Bank A", "London", "GB"), 40)
+        val dummyRegulator = TestIdentity(CordaX500Name("Regulator A", "Paris", "FR"), 100)
+        val DUMMY_BANK_A get() = dummyBankA.party
+        val DUMMY_REGULATOR get() = dummyRegulator.party
+        val executorService: ScheduledExecutorService = Executors.newScheduledThreadPool(2)
+        fun nodeMustBeUp(handleFuture: CordaFuture<out NodeHandle>) = handleFuture.getOrThrow().apply {
             val hostAndPort = nodeInfo.addresses.first()
             // Check that the port is bound
             addressMustBeBound(executorService, hostAndPort, (this as? NodeHandle.OutOfProcess)?.process)
         }
 
-        private fun nodeMustBeDown(handle: NodeHandle) {
+        fun nodeMustBeDown(handle: NodeHandle) {
             val hostAndPort = handle.nodeInfo.addresses.first()
             // Check that the port is bound
             addressMustNotBeBound(executorService, hostAndPort)
@@ -92,8 +96,8 @@ class DriverTests {
             assertThat(baseDirectory / "process-id").exists()
         }
 
-        val baseDirectory = driver(notarySpecs = listOf(NotarySpec(DUMMY_NOTARY.name))) {
-            baseDirectory(DUMMY_NOTARY.name)
+        val baseDirectory = driver(notarySpecs = listOf(NotarySpec(DUMMY_NOTARY_NAME))) {
+            baseDirectory(DUMMY_NOTARY_NAME)
         }
         assertThat(baseDirectory / "process-id").doesNotExist()
     }

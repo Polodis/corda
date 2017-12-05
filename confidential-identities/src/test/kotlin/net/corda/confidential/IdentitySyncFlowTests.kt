@@ -5,6 +5,7 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.FlowSession
 import net.corda.core.flows.InitiatedBy
 import net.corda.core.flows.InitiatingFlow
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.transactions.WireTransaction
 import net.corda.core.utilities.OpaqueBytes
@@ -24,6 +25,15 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class IdentitySyncFlowTests {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val charlie = TestIdentity(CordaX500Name("Charlie Ltd", "Athens", "GR"), 90)
+        val ALICE_NAME get() = alice.name
+        val BOB_NAME get() = bob.name
+        val CHARLIE_NAME get() = charlie.name
+    }
+
     private lateinit var mockNet: MockNetwork
 
     @Before

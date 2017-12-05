@@ -4,6 +4,7 @@ import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.whenever
 import net.corda.core.contracts.*
 import net.corda.core.identity.AbstractParty
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.node.ServicesForResolution
 import net.corda.core.serialization.deserialize
@@ -19,6 +20,11 @@ import org.junit.Rule
 import org.junit.Test
 
 class AttachmentsClassLoaderStaticContractTests {
+    private companion object {
+        val megaCorp = TestIdentity(CordaX500Name("MegaCorp", "London", "GB"))
+        val dummyNotary = TestIdentity(CordaX500Name("Notary Service", "Zurich", "CH"), 20)
+    }
+
     @Rule
     @JvmField
     val testSerialization = SerializationEnvironmentRule()
@@ -54,7 +60,7 @@ class AttachmentsClassLoaderStaticContractTests {
 
     @Test
     fun `test serialization of WireTransaction with statically loaded contract`() {
-        val tx = AttachmentDummyContract().generateInitial(MEGA_CORP.ref(0), 42, DUMMY_NOTARY)
+        val tx = AttachmentDummyContract().generateInitial(megaCorp.ref(0), 42, dummyNotary.party)
         val wireTransaction = tx.toWireTransaction(serviceHub)
         val bytes = wireTransaction.serialize()
         val copiedWireTransaction = bytes.deserialize()

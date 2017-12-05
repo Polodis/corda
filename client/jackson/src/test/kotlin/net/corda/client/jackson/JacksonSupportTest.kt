@@ -6,6 +6,7 @@ import com.nhaarman.mockito_kotlin.whenever
 import net.corda.core.contracts.Amount
 import net.corda.core.cordapp.CordappProvider
 import net.corda.core.crypto.*
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.node.ServiceHub
 import net.corda.core.transactions.SignedTransaction
 import net.corda.finance.USD
@@ -20,8 +21,12 @@ import java.util.*
 import kotlin.test.assertEquals
 
 class JacksonSupportTest {
-    companion object {
-        private val SEED = BigInteger.valueOf(20170922L)
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val DUMMY_NOTARY = TestIdentity(DUMMY_NOTARY_NAME, 20).party
+        val miniCorp = TestIdentity(CordaX500Name("MiniCorp", "London", "GB"))
+        val ALICE_PUBKEY get() = alice.pubkey
+        val SEED = BigInteger.valueOf(20170922L)
         val mapper = JacksonSupport.createNonRpcMapper()
     }
 
@@ -94,7 +99,7 @@ class JacksonSupportTest {
         val attachmentRef = SecureHash.randomSHA256()
         doReturn(attachmentRef).whenever(cordappProvider).getContractAttachmentID(DummyContract.PROGRAM_ID)
         fun makeDummyTx(): SignedTransaction {
-            val wtx = DummyContract.generateInitial(1, DUMMY_NOTARY, MINI_CORP.ref(1))
+            val wtx = DummyContract.generateInitial(1, DUMMY_NOTARY, miniCorp.ref(1))
                     .toWireTransaction(services)
             val signatures = TransactionSignature(
                     ByteArray(1),

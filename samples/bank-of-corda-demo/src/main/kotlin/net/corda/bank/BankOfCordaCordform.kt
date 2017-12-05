@@ -14,12 +14,11 @@ import net.corda.node.services.Permissions.Companion.all
 import net.corda.node.services.config.NotaryConfig
 import net.corda.node.services.transactions.ValidatingNotaryService
 import net.corda.nodeapi.internal.config.User
-import net.corda.testing.BOC
 import net.corda.testing.internal.demorun.*
 import java.util.*
 import kotlin.system.exitProcess
 
-val BIGCORP_NAME = CordaX500Name(organisation = "BigCorporation", locality = "New York", country = "US")
+private val BIGCORP_NAME = CordaX500Name(organisation = "BigCorporation", locality = "New York", country = "US")
 private val NOTARY_NAME = CordaX500Name(organisation = "Notary Service", locality = "Zurich", country = "CH")
 private val BOC_RPC_PORT = 10006
 private val BOC_WEB_PORT = 10007
@@ -102,7 +101,7 @@ object IssueCash {
     }
 
     private fun createParams(amount: Amount<Currency>, notaryName: CordaX500Name): IssueRequestParams {
-        return IssueRequestParams(amount, BIGCORP_NAME, "1", BOC.name, notaryName.copy(commonName = ValidatingNotaryService.id))
+        return IssueRequestParams(amount, BIGCORP_NAME, "1", CordaX500Name("BankOfCorda", "London", "GB"), notaryName.copy(commonName = ValidatingNotaryService.id))
     }
 
     private fun printHelp(parser: OptionParser) {

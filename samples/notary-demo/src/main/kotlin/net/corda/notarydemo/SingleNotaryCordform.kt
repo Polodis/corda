@@ -7,7 +7,7 @@ import net.corda.node.services.config.NotaryConfig
 import net.corda.nodeapi.internal.config.User
 import net.corda.testing.ALICE
 import net.corda.testing.BOB
-import net.corda.testing.DUMMY_NOTARY
+import net.corda.testing.DUMMY_NOTARY_NAME
 import net.corda.testing.internal.demorun.*
 import java.nio.file.Paths
 
@@ -32,7 +32,7 @@ class SingleNotaryCordform : CordformDefinition() {
             rpcPort(10006)
         }
         node {
-            name(DUMMY_NOTARY.name)
+            name(DUMMY_NOTARY_NAME)
             p2pPort(10009)
             rpcPort(10010)
             notary(NotaryConfig(validating = true))

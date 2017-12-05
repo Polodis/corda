@@ -72,6 +72,16 @@ class TwoPartyTradeFlowTests(private val anonymous: Boolean) {
         @JvmStatic
         @Parameterized.Parameters(name = "Anonymous = {0}")
         fun data(): Collection<Boolean> = listOf(true, false)
+
+        private val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        private val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        private val bankOfCorda = TestIdentity(CordaX500Name("BankOfCorda", "London", "GB"))
+        private val megaCorp = TestIdentity(CordaX500Name("MegaCorp", "London", "GB"))
+        private val dummyNotary = TestIdentity(CordaX500Name("Notary Service", "Zurich", "CH"), 20)
+        private val ALICE_NAME get() = alice.name
+        private val BOB_NAME get() = bob.name
+        private val BOC_NAME get() = bankOfCorda.name
+        private val MEGA_CORP get() = megaCorp.party
     }
 
     private lateinit var mockNet: MockNetwork
@@ -111,7 +121,7 @@ class TwoPartyTradeFlowTests(private val anonymous: Boolean) {
             bobNode.internals.disableDBCloseOnStop()
 
             bobNode.database.transaction {
-                VaultFiller(bobNode.services, DUMMY_NOTARY, DUMMY_NOTARY_KEY, notary, ::Random).fillWithSomeTestCash(2000.DOLLARS, bankNode.services, 3, 10, cashIssuer)
+                VaultFiller(bobNode.services, dummyNotary, notary, ::Random).fillWithSomeTestCash(2000.DOLLARS, bankNode.services, 3, 10, cashIssuer)
             }
 
             val alicesFakePaper = aliceNode.database.transaction {
@@ -162,7 +172,7 @@ class TwoPartyTradeFlowTests(private val anonymous: Boolean) {
             bobNode.internals.disableDBCloseOnStop()
 
             val cashStates = bobNode.database.transaction {
-                VaultFiller(bobNode.services, DUMMY_NOTARY, DUMMY_NOTARY_KEY, notary, ::Random).fillWithSomeTestCash(2000.DOLLARS, bankNode.services, 3, issuer)
+                VaultFiller(bobNode.services, dummyNotary, notary, ::Random).fillWithSomeTestCash(2000.DOLLARS, bankNode.services, 3, issuer)
             }
 
             val alicesFakePaper = aliceNode.database.transaction {
@@ -223,7 +233,7 @@ class TwoPartyTradeFlowTests(private val anonymous: Boolean) {
             val issuer = bank.ref(1, 2, 3)
 
             bobNode.database.transaction {
-                VaultFiller(bobNode.services, DUMMY_NOTARY, DUMMY_NOTARY_KEY, notary, ::Random).fillWithSomeTestCash(2000.DOLLARS, bankNode.services, 3, 10, issuer)
+                VaultFiller(bobNode.services, dummyNotary, notary, ::Random).fillWithSomeTestCash(2000.DOLLARS, bankNode.services, 3, 10, issuer)
             }
             val alicesFakePaper = aliceNode.database.transaction {
                 fillUpForSeller(false, issuer, alice,

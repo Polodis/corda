@@ -47,7 +47,7 @@ class IRSDemoTest {
     fun `runs IRS demo`() {
         springDriver(
                 useTestClock = true,
-                notarySpecs = listOf(NotarySpec(DUMMY_NOTARY.name, rpcUsers = rpcUsers)),
+                notarySpecs = listOf(NotarySpec(DUMMY_NOTARY_NAME, rpcUsers = rpcUsers)),
                 isDebug = true,
                 extraCordappPackagesToScan = listOf("net.corda.irs")
         ) {

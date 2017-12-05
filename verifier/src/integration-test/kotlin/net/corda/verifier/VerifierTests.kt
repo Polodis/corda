@@ -12,10 +12,7 @@ import net.corda.finance.DOLLARS
 import net.corda.finance.flows.CashIssueFlow
 import net.corda.finance.flows.CashPaymentFlow
 import net.corda.node.services.config.VerifierType
-import net.corda.testing.ALICE
-import net.corda.testing.ALICE_NAME
-import net.corda.testing.DUMMY_NOTARY
-import net.corda.testing.SerializationEnvironmentRule
+import net.corda.testing.*
 import net.corda.testing.node.NotarySpec
 import org.junit.Rule
 import org.junit.Test
@@ -137,7 +134,7 @@ class VerifierTests {
     fun `single verifier works with a node`() {
         verifierDriver(
                 extraCordappPackagesToScan = listOf("net.corda.finance.contracts"),
-                notarySpecs = listOf(NotarySpec(DUMMY_NOTARY.name, verifierType = VerifierType.OutOfProcess))
+                notarySpecs = listOf(NotarySpec(DUMMY_NOTARY_NAME, verifierType = VerifierType.OutOfProcess))
         ) {
             val aliceNode = startNode(providedName = ALICE.name).getOrThrow()
             val notaryNode = defaultNotaryNode.getOrThrow()

@@ -35,6 +35,15 @@ import org.junit.Test
 import rx.Observable
 
 class NodeMonitorModelTest {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val charlie = TestIdentity(CordaX500Name("Charlie Ltd", "Athens", "GR"), 90)
+        val ALICE_NAME get() = alice.name
+        val BOB_NAME get() = bob.name
+        val CHARLIE_NAME get() = charlie.name
+    }
+
     private lateinit var aliceNode: NodeInfo
     private lateinit var bobNode: NodeInfo
     private lateinit var notaryParty: Party

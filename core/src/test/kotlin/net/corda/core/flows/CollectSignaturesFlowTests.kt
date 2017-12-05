@@ -4,6 +4,7 @@ import co.paralleluniverse.fibers.Suspendable
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateAndContract
 import net.corda.core.contracts.requireThat
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.identity.excludeHostNode
 import net.corda.core.identity.groupAbstractPartyByWellKnownParty
@@ -22,6 +23,16 @@ import kotlin.reflect.KClass
 import kotlin.test.assertFailsWith
 
 class CollectSignaturesFlowTests {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val charlie = TestIdentity(CordaX500Name("Charlie Ltd", "Athens", "GR"), 90)
+        val miniCorp = TestIdentity(CordaX500Name("MiniCorp", "London", "GB"))
+        val ALICE get() = alice.party
+        val BOB get() = bob.party
+        val CHARLIE get() = charlie.party
+    }
+
     private lateinit var mockNet: MockNetwork
     private lateinit var aliceNode: StartedNode<MockNetwork.MockNode>
     private lateinit var bobNode: StartedNode<MockNetwork.MockNode>
@@ -129,7 +140,7 @@ class CollectSignaturesFlowTests {
     @Test
     fun `fails when not signed by initiator`() {
         val onePartyDummyContract = DummyContract.generateInitial(1337, notary, alice.ref(1))
-        val miniCorpServices = MockServices(listOf("net.corda.testing.contracts"), rigorousMock(), MINI_CORP.name, MINI_CORP_KEY)
+        val miniCorpServices = MockServices(listOf("net.corda.testing.contracts"), rigorousMock(), miniCorp)
         val ptx = miniCorpServices.signInitialTransaction(onePartyDummyContract)
         val flow = aliceNode.services.startFlow(CollectSignaturesFlow(ptx, emptySet()))
         mockNet.runNetwork()

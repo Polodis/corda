@@ -3,6 +3,7 @@ package net.corda.docs
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.queryBy
@@ -18,6 +19,13 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class WorkflowTransactionBuildTutorialTest {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val ALICE_NAME get() = alice.name
+        val BOB_NAME get() = bob.name
+    }
+
     private lateinit var mockNet: MockNetwork
     private lateinit var aliceServices: StartedNodeServices
     private lateinit var bobServices: StartedNodeServices

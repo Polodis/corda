@@ -7,6 +7,7 @@ import com.esotericsoftware.kryo.io.Output
 import com.google.common.primitives.Ints
 import net.corda.core.contracts.PrivacySalt
 import net.corda.core.crypto.*
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.internal.FetchDataFlow
 import net.corda.core.serialization.*
 import net.corda.core.utilities.ProgressTracker
@@ -14,8 +15,8 @@ import net.corda.core.utilities.sequence
 import net.corda.node.serialization.KryoServerSerializationScheme
 import net.corda.node.services.persistence.NodeAttachmentService
 import net.corda.nodeapi.internal.serialization.kryo.KryoHeaderV0_1
-import net.corda.testing.ALICE_PUBKEY
 import net.corda.testing.SerializationEnvironmentRule
+import net.corda.testing.TestIdentity
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Before
@@ -31,6 +32,11 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class KryoTests {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val ALICE_PUBKEY get() = alice.pubkey
+    }
+
     @Rule
     @JvmField
     val testSerialization = SerializationEnvironmentRule()

@@ -28,8 +28,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class NotaryChangeTests {
-    companion object {
-        private val DUMMY_NOTARY_SERVICE_NAME: CordaX500Name = DUMMY_NOTARY.name.copy(commonName = "corda.notary.validating")
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val ALICE_NAME get() = alice.name
+        val BOB_NAME get() = bob.name
+        val DUMMY_NOTARY_SERVICE_NAME = DUMMY_NOTARY_NAME.copy(commonName = "corda.notary.validating")
     }
 
     private lateinit var mockNet: MockNetwork
@@ -42,9 +46,9 @@ class NotaryChangeTests {
 
     @Before
     fun setUp() {
-        val oldNotaryName = DUMMY_NOTARY.name.copy(organisation = "Old Dummy Notary")
+        val oldNotaryName = DUMMY_NOTARY_NAME.copy(organisation = "Old Dummy Notary")
         mockNet = MockNetwork(
-                notarySpecs = listOf(NotarySpec(DUMMY_NOTARY.name), NotarySpec(oldNotaryName)),
+                notarySpecs = listOf(NotarySpec(DUMMY_NOTARY_NAME), NotarySpec(oldNotaryName)),
                 cordappPackages = listOf("net.corda.testing.contracts")
         )
         clientNodeA = mockNet.createNode(MockNodeParameters(legalName = ALICE_NAME))

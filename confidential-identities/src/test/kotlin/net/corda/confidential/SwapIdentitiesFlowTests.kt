@@ -1,18 +1,23 @@
 package net.corda.confidential
 
-import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.AnonymousParty
-import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
+import net.corda.core.identity.*
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.*
 import net.corda.testing.node.MockNetwork
 import org.junit.Before
-import net.corda.testing.node.MockNodeParameters
 import org.junit.Test
 import kotlin.test.*
 
 class SwapIdentitiesFlowTests {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val charlie = TestIdentity(CordaX500Name("Charlie Ltd", "Athens", "GR"), 90)
+        val ALICE get() = alice.party
+        val BOB get() = bob.party
+        val CHARLIE get() = charlie.party
+    }
+
     private lateinit var mockNet: MockNetwork
 
     @Before

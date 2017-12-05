@@ -4,6 +4,7 @@ import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.whenever
 import net.corda.core.contracts.*
 import net.corda.core.crypto.SecureHash
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.internal.declaredField
 import net.corda.core.internal.toWireTransaction
 import net.corda.core.node.ServiceHub
@@ -35,7 +36,9 @@ class AttachmentsClassLoaderTests {
     companion object {
         val ISOLATED_CONTRACTS_JAR_PATH: URL = AttachmentsClassLoaderTests::class.java.getResource("isolated.jar")
         private const val ISOLATED_CONTRACT_CLASS_NAME = "net.corda.finance.contracts.isolated.AnotherDummyContract"
-
+        private val megaCorp = TestIdentity(CordaX500Name("MegaCorp", "London", "GB"))
+        private val dummyNotary = TestIdentity(CordaX500Name("Notary Service", "Zurich", "CH"), 20)
+        private val DUMMY_NOTARY get() = dummyNotary.party
         private fun SerializationContext.withAttachmentStorage(attachmentStorage: AttachmentStorage): SerializationContext {
             val serviceHub = rigorousMock<ServiceHub>()
             doReturn(attachmentStorage).whenever(serviceHub).attachments
@@ -263,7 +266,7 @@ class AttachmentsClassLoaderTests {
         val child = appContext.classLoader
         val contractClass = Class.forName(ISOLATED_CONTRACT_CLASS_NAME, true, child)
         val contract = contractClass.newInstance() as DummyContractBackdoor
-        val tx = contract.generateInitial(MEGA_CORP.ref(0), 42, DUMMY_NOTARY)
+        val tx = contract.generateInitial(megaCorp.ref(0), 42, DUMMY_NOTARY)
         val context = SerializationFactory.defaultFactory.defaultContext
                 .withWhitelisted(contract.javaClass)
                 .withWhitelisted(Class.forName("$ISOLATED_CONTRACT_CLASS_NAME\$State", true, child))
@@ -290,7 +293,7 @@ class AttachmentsClassLoaderTests {
             ClassLoaderForTests().use { child ->
                 val contractClass = Class.forName(ISOLATED_CONTRACT_CLASS_NAME, true, child)
                 val contract = contractClass.newInstance() as DummyContractBackdoor
-                val tx = contract.generateInitial(MEGA_CORP.ref(0), 42, DUMMY_NOTARY)
+                val tx = contract.generateInitial(megaCorp.ref(0), 42, DUMMY_NOTARY)
                 val attachmentRef = attachmentId
                 val bytes = run {
                     val outboundContext = SerializationFactory.defaultFactory.defaultContext

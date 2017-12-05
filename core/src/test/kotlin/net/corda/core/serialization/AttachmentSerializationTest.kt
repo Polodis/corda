@@ -7,6 +7,7 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.FlowSession
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.TestDataVendingFlow
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.internal.FetchAttachmentsFlow
 import net.corda.core.internal.FetchDataFlow
@@ -16,12 +17,9 @@ import net.corda.node.internal.InitiatedFlowFactory
 import net.corda.node.internal.StartedNode
 import net.corda.node.services.persistence.NodeAttachmentService
 import net.corda.nodeapi.internal.persistence.currentDBSession
-import net.corda.testing.ALICE_NAME
-import net.corda.testing.BOB_NAME
+import net.corda.testing.*
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.MockNodeParameters
-import net.corda.testing.singleIdentity
-import net.corda.testing.startFlow
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -63,6 +61,13 @@ private fun updateAttachment(attachmentId: SecureHash, data: ByteArray) {
 }
 
 class AttachmentSerializationTest {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val ALICE_NAME get() = alice.name
+        val BOB_NAME get() = bob.name
+    }
+
     private lateinit var mockNet: MockNetwork
     private lateinit var server: StartedNode<MockNetwork.MockNode>
     private lateinit var client: StartedNode<MockNetwork.MockNode>

@@ -2,6 +2,7 @@ package net.corda.docs.tutorial.testdsl
 
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.whenever
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.days
 import net.corda.finance.DOLLARS
 import net.corda.finance.`issued by`
@@ -17,6 +18,19 @@ import org.junit.Rule
 import org.junit.Test
 
 class CommercialPaperTest {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bigCorp = TestIdentity(CordaX500Name("BigCorporation", "New York", "US"))
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val megaCorp = TestIdentity(CordaX500Name("MegaCorp", "London", "GB"))
+        val ALICE get() = alice.party
+        val ALICE_PUBKEY get() = alice.pubkey
+        val BIG_CORP_PUBKEY get() = bigCorp.pubkey
+        val BOB get() = bob.party
+        val MEGA_CORP get() = megaCorp.party
+        val MEGA_CORP_PUBKEY get() = megaCorp.pubkey
+    }
+
     @Rule
     @JvmField
     val testSerialization = SerializationEnvironmentRule()

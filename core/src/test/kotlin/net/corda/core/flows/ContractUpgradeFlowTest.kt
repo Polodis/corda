@@ -3,6 +3,7 @@ package net.corda.core.flows
 import co.paralleluniverse.fibers.Suspendable
 import net.corda.core.contracts.*
 import net.corda.core.identity.AbstractParty
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.internal.Emoji
 import net.corda.core.messaging.CordaRPCOps
@@ -20,8 +21,7 @@ import net.corda.node.internal.SecureCordaRPCOps
 import net.corda.node.internal.StartedNode
 import net.corda.node.services.Permissions.Companion.startFlow
 import net.corda.nodeapi.internal.config.User
-import net.corda.testing.ALICE_NAME
-import net.corda.testing.BOB_NAME
+import net.corda.testing.*
 import net.corda.testing.contracts.DummyContract
 import net.corda.testing.contracts.DummyContractV2
 import net.corda.testing.internal.RPCDriverDSL
@@ -29,8 +29,6 @@ import net.corda.testing.internal.rpcDriver
 import net.corda.testing.internal.rpcTestUser
 import net.corda.testing.internal.startRpcClient
 import net.corda.testing.node.MockNetwork
-import net.corda.testing.singleIdentity
-import net.corda.testing.startFlow
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -40,6 +38,13 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class ContractUpgradeFlowTest {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bob = TestIdentity(CordaX500Name("Bob Plc", "Rome", "IT"), 80)
+        val ALICE_NAME get() = alice.name
+        val BOB_NAME get() = bob.name
+    }
+
     private lateinit var mockNet: MockNetwork
     private lateinit var aliceNode: StartedNode<MockNetwork.MockNode>
     private lateinit var bobNode: StartedNode<MockNetwork.MockNode>

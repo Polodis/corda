@@ -1,13 +1,11 @@
 package net.corda.traderdemo
 
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.internal.div
 import net.corda.finance.flows.CashIssueFlow
 import net.corda.node.services.Permissions.Companion.all
 import net.corda.node.services.Permissions.Companion.startFlow
 import net.corda.nodeapi.internal.config.User
-import net.corda.testing.BOC
-import net.corda.testing.DUMMY_BANK_A
-import net.corda.testing.DUMMY_BANK_B
 import net.corda.testing.driver.driver
 import net.corda.traderdemo.flow.CommercialPaperIssueFlow
 import net.corda.traderdemo.flow.SellerFlow
@@ -26,8 +24,8 @@ fun main(args: Array<String>) {
         val user = User("user1", "test", permissions = setOf(startFlow<CashIssueFlow>(),
                 startFlow<CommercialPaperIssueFlow>(),
                 startFlow<SellerFlow>()))
-        startNode(providedName = DUMMY_BANK_A.name, rpcUsers = demoUser)
-        startNode(providedName = DUMMY_BANK_B.name, rpcUsers = demoUser)
-        startNode(providedName = BOC.name, rpcUsers = listOf(user))
+        startNode(providedName = CordaX500Name("Bank A", "London", "GB"), rpcUsers = demoUser)
+        startNode(providedName = CordaX500Name("Bank B", "New York", "US"), rpcUsers = demoUser)
+        startNode(providedName = CordaX500Name("BankOfCorda", "London", "GB"), rpcUsers = listOf(user))
     }
 }

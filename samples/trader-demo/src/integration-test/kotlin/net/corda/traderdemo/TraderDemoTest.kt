@@ -1,6 +1,7 @@
 package net.corda.traderdemo
 
 import net.corda.client.rpc.CordaRPCClient
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.getOrThrow
 import net.corda.core.utilities.millis
 import net.corda.finance.DOLLARS
@@ -9,10 +10,7 @@ import net.corda.finance.flows.CashPaymentFlow
 import net.corda.node.services.Permissions.Companion.all
 import net.corda.node.services.Permissions.Companion.startFlow
 import net.corda.nodeapi.internal.config.User
-import net.corda.testing.BOC
-import net.corda.testing.DUMMY_BANK_A
-import net.corda.testing.DUMMY_BANK_B
-import net.corda.testing.chooseIdentity
+import net.corda.testing.*
 import net.corda.testing.driver.NodeHandle
 import net.corda.testing.driver.driver
 import net.corda.testing.internal.poll
@@ -24,6 +22,15 @@ import org.junit.Test
 import java.util.concurrent.Executors
 
 class TraderDemoTest {
+    private companion object {
+        val bankOfCorda = TestIdentity(CordaX500Name("BankOfCorda", "London", "GB"))
+        val dummyBankA = TestIdentity(CordaX500Name("Bank A", "London", "GB"), 40)
+        val dummyBankB = TestIdentity(CordaX500Name("Bank B", "New York", "US"), 50)
+        val BOC get() = bankOfCorda.party
+        val DUMMY_BANK_A get() = dummyBankA.party
+        val DUMMY_BANK_B get() = dummyBankB.party
+    }
+
     @Test
     fun `runs trader demo`() {
         val demoUser = User("demo", "demo", setOf(startFlow<SellerFlow>(), all()))

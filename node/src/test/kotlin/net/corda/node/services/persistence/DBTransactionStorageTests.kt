@@ -5,6 +5,7 @@ import net.corda.core.crypto.Crypto
 import net.corda.core.crypto.SecureHash
 import net.corda.core.crypto.SignatureMetadata
 import net.corda.core.crypto.TransactionSignature
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.toFuture
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.WireTransaction
@@ -23,6 +24,12 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 
 class DBTransactionStorageTests {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val ALICE_PUBKEY get() = alice.pubkey
+        val DUMMY_NOTARY = TestIdentity(DUMMY_NOTARY_NAME, 20).party
+    }
+
     @Rule
     @JvmField
     val testSerialization = SerializationEnvironmentRule()

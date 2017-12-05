@@ -1,11 +1,10 @@
 package net.corda.node.services.network
 
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.node.services.NetworkMapCache
-import net.corda.testing.ALICE_NAME
-import net.corda.testing.BOB_NAME
+import net.corda.testing.*
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.MockNodeParameters
-import net.corda.testing.singleIdentity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Test
@@ -13,6 +12,11 @@ import java.math.BigInteger
 import kotlin.test.assertEquals
 
 class NetworkMapCacheTest {
+    private companion object {
+        val ALICE_NAME = CordaX500Name("Alice Corp", "Madrid", "ES")
+        val BOB_NAME = CordaX500Name("Bob Plc", "Rome", "IT")
+    }
+
     private val mockNet = MockNetwork()
 
     @After

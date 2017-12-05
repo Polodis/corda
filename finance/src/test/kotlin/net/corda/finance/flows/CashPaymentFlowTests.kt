@@ -1,5 +1,6 @@
 package net.corda.finance.flows
 
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.node.services.Vault
 import net.corda.core.node.services.trackBy
@@ -21,6 +22,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class CashPaymentFlowTests {
+    private companion object {
+        val alice = TestIdentity(CordaX500Name("Alice Corp", "Madrid", "ES"), 70)
+        val bankOfCorda = TestIdentity(CordaX500Name("BankOfCorda", "London", "GB"))
+        val ALICE_NAME get() = alice.name
+        val BOC_NAME get() = bankOfCorda.name
+    }
+
     private lateinit var mockNet: MockNetwork
     private val initialBalance = 2000.DOLLARS
     private val ref = OpaqueBytes.of(0x01)
