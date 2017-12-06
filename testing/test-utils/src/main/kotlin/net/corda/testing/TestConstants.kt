@@ -10,6 +10,7 @@ import net.corda.core.crypto.generateKeyPair
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.identity.PartyAndCertificate
+import net.corda.core.internal.cert
 import net.corda.core.internal.toX509CertHolder
 import net.corda.core.internal.x500Name
 import net.corda.nodeapi.internal.crypto.*
@@ -21,6 +22,10 @@ import java.math.BigInteger
 import java.security.KeyPair
 import java.security.PublicKey
 import java.security.Security
+import java.security.cert.CertPathValidator
+import java.security.cert.PKIXCertPathValidatorResult
+import java.security.cert.PKIXParameters
+import java.security.cert.TrustAnchor
 import java.time.Instant
 
 // A dummy time at which we will be pretending test transactions are created.
