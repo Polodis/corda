@@ -38,9 +38,9 @@ import net.corda.node.utilities.AffinityExecutor
 import net.corda.node.utilities.AffinityExecutor.ServiceAffinityExecutor
 import net.corda.nodeapi.internal.persistence.CordaPersistence
 import net.corda.nodeapi.internal.ServiceIdentityGenerator
-import net.corda.nodeapi.internal.NotaryInfo
+import net.corda.nodeapi.internal.network.NotaryInfo
 import net.corda.testing.DUMMY_NOTARY
-import net.corda.nodeapi.internal.NetworkParametersCopier
+import net.corda.nodeapi.internal.network.NetworkParametersCopier
 import net.corda.testing.common.internal.testNetworkParameters
 import net.corda.testing.internal.testThreadFactory
 import net.corda.testing.node.MockServices.Companion.MOCK_VERSION_INFO
