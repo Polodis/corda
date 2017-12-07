@@ -1,6 +1,7 @@
 package net.corda.node.utilities
 
 import net.corda.core.crypto.CompositeKey
+import net.corda.core.crypto.Crypto
 import net.corda.core.crypto.generateKeyPair
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
@@ -33,8 +34,9 @@ object ServiceIdentityGenerator {
 
         val caKeyStore = loadKeyStore(javaClass.classLoader.getResourceAsStream("net/corda/node/internal/certificates/cordadevcakeys.jks"), "cordacadevpass")
         val intermediateCa = caKeyStore.getCertificateAndKeyPair(X509Utilities.CORDA_INTERMEDIATE_CA, "cordacadevkeypass")
+        // TODO: We should be saving the node CA key & cert
         val nodeCaName = X500Name("O=${X509Utilities.CORDA_CLIENT_CA_CN},L=London,C=GB")
-        val nodeCaKeyPair = generateKeyPair()
+        val nodeCaKeyPair = Crypto.generateKeyPair(signatureScheme = Crypto.ECDSA_SECP256K1_SHA256)
         val nodeCa = CertificateAndKeyPair(X509Utilities.createCertificate(CertificateType.NODE_CA, intermediateCa.certificate, intermediateCa.keyPair, nodeCaName, nodeCaKeyPair.public), nodeCaKeyPair)
         val rootCert = caKeyStore.getCertificate(X509Utilities.CORDA_ROOT_CA)
 
