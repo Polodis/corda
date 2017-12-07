@@ -818,7 +818,7 @@ class DriverDSL(
             notaryInfos += NotaryInfo(identity, type.validating)
         }
 
-        networkParameters = NetworkParametersCopier(testNetworkParameters(notaryInfos))
+        if (compatibilityZone == null) networkParameters = NetworkParametersCopier(testNetworkParameters(notaryInfos))
 
         return cordforms.map {
             val startedNode = startCordformNode(it)
@@ -885,7 +885,7 @@ class DriverDSL(
 
         val notaryInfos = generateNotaryIdentities()
         // The network parameters must be serialised before starting any of the nodes
-        networkParameters = NetworkParametersCopier(testNetworkParameters(notaryInfos))
+        if (compatibilityZone == null) networkParameters = NetworkParametersCopier(testNetworkParameters(notaryInfos))
         val nodeHandles = startNotaries()
         _notaries = notaryInfos.zip(nodeHandles) { (identity, validating), nodes -> NotaryHandle(identity, validating, nodes) }
     }
@@ -1053,7 +1053,7 @@ class DriverDSL(
         val nodeInfoFilesCopier = if (compatibilityZone == null) nodeInfoFilesCopier else null
 
         nodeInfoFilesCopier?.addConfig(baseDirectory)
-        networkParameters!!.install(baseDirectory)
+        if (compatibilityZone == null) networkParameters!!.install(baseDirectory)
         val onNodeExit: () -> Unit = {
             nodeInfoFilesCopier?.removeConfig(baseDirectory)
             countObservables.remove(configuration.myLegalName)
