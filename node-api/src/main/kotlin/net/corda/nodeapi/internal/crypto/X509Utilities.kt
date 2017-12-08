@@ -308,7 +308,6 @@ object X509Utilities {
  */
 class X509CertificateFactory {
     val delegate: CertificateFactory = CertificateFactory.getInstance("X.509")
-
     fun generateCertificate(input: InputStream): X509Certificate {
         return delegate.generateCertificate(input) as X509Certificate
     }

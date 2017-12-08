@@ -84,15 +84,10 @@ class NetworkRegistrationHelper(private val config: NodeConfiguration, private v
             caKeyStore.addOrReplaceKey(CORDA_CLIENT_CA, keyPair.private, privateKeyPassword.toCharArray(), certificates)
             caKeyStore.deleteEntry(SELF_SIGNED_PRIVATE_KEY)
             caKeyStore.save(config.nodeKeystore, keystorePassword)
-
-            // Check the root certificate.
-            val returnedRootCa = certificates.last()
-            checkReturnedRootCaMatchesExpectedCa(returnedRootCa)
-
             // Save root certificates to trust store.
             val trustStore = loadOrCreateKeyStore(config.trustStoreFile, config.trustStorePassword)
             // Assumes certificate chain always starts with client certificate and end with root certificate.
-            trustStore.addOrReplaceCertificate(CORDA_ROOT_CA, returnedRootCa)
+            trustStore.addOrReplaceCertificate(CORDA_ROOT_CA, certificates.last())
             trustStore.save(config.trustStoreFile, config.trustStorePassword)
             println("Node private key and certificate stored in ${config.nodeKeystore}.")
 
@@ -109,16 +104,6 @@ class NetworkRegistrationHelper(private val config: NodeConfiguration, private v
             requestIdStore.deleteIfExists()
         } else {
             println("Certificate already exists, Corda node will now terminate...")
-        }
-    }
-
-    /**
-     * Checks that the passed Certificate is the expected root CA.
-     * @throws WrongRootCertException if the certificates don't match.
-     */
-    private fun checkReturnedRootCaMatchesExpectedCa(returnedRootCa: Certificate) {
-        if (rootCert != returnedRootCa) {
-            throw WrongRootCertException(rootCert, returnedRootCa, config.rootCertFile)
         }
     }
 
@@ -175,17 +160,3 @@ class NetworkRegistrationHelper(private val config: NodeConfiguration, private v
         }
     }
 }
-
-/**
- * Exception thrown when the doorman root certificate doesn't match the expected (out-of-band) root certificate.
- * This usually means the has been a Man-in-the-middle attack when contacting the doorman.
- */
-class WrongRootCertException(expected: Certificate,
-                             actual: Certificate,
-                             expectedFilePath: Path):
-        Exception("""
-            The Root CA returned back from the registration process does not match the expected Root CA
-            expected: $expected
-            actual: $actual
-            the expected certificate is stored in: $expectedFilePath
-            """.trimMargin())
