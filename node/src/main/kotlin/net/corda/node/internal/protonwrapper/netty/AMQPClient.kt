@@ -24,8 +24,10 @@ import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.TrustManagerFactory
 import kotlin.concurrent.withLock
 
-class AMQPClient(val target: NetworkHostAndPort,
+class AMQPClient(val targets: List<NetworkHostAndPort>,
                  val allowedRemoteLegalNames: Set<CordaX500Name>,
+                 val userName: String?,
+                 val password: String?,
                  keyStore: KeyStore,
                  keyStorePrivateKeyPassword: String,
                  trustStore: KeyStore,
@@ -47,6 +49,8 @@ class AMQPClient(val target: NetworkHostAndPort,
     private var clientChannel: Channel? = null
     private val keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
     private val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+    private var targetIndex = 0
+    private var currentTarget: NetworkHostAndPort = targets.first()
 
     init {
         keyManagerFactory.init(keyStore, keyStorePrivateKeyPassword.toCharArray())
@@ -56,16 +60,17 @@ class AMQPClient(val target: NetworkHostAndPort,
     private val connectListener = object : ChannelFutureListener {
         override fun operationComplete(future: ChannelFuture) {
             if (!future.isSuccess) {
-                log.info("Failed to connect to $target")
+                log.info("Failed to connect to $currentTarget")
 
                 if (!stopping) {
                     workerGroup?.schedule({
-                        log.info("Retry connect to $target")
+                        log.info("Retry connect to $currentTarget")
+                        targetIndex = (targetIndex + 1).rem(targets.size)
                         restart()
                     }, RETRY_INTERVAL, TimeUnit.MILLISECONDS)
                 }
             } else {
-                log.info("Connected to $target")
+                log.info("Connected to $currentTarget")
                 // Connection established successfully
                 clientChannel = future.channel()
                 clientChannel?.closeFuture()?.addListener(closeListener)
@@ -75,12 +80,12 @@ class AMQPClient(val target: NetworkHostAndPort,
 
     private val closeListener = object : ChannelFutureListener {
         override fun operationComplete(future: ChannelFuture) {
-            log.info("Disconnected from $target")
-            _onConnected.onNext(false)
+            log.info("Disconnected from $currentTarget")
             future.channel()?.disconnect()
             if (!stopping) {
                 workerGroup?.schedule({
-                    log.info("Retry connect to $target")
+                    log.info("Retry connect")
+                    targetIndex = (targetIndex + 1).rem(targets.size)
                     restart()
                 }, RETRY_INTERVAL, TimeUnit.MILLISECONDS)
             }
@@ -90,14 +95,16 @@ class AMQPClient(val target: NetworkHostAndPort,
     private class ClientChannelInitializer(val parent: AMQPClient) : ChannelInitializer<SocketChannel>() {
         override fun initChannel(ch: SocketChannel) {
             val pipeline = ch.pipeline()
-            val handler = createClientSslHelper(parent.target, parent.keyManagerFactory, parent.trustManagerFactory)
+            val handler = createClientSslHelper(parent.currentTarget, parent.keyManagerFactory, parent.trustManagerFactory)
             pipeline.addLast("sslHandler", handler)
             if (parent.trace) pipeline.addLast("logger", LoggingHandler(LogLevel.INFO))
             pipeline.addLast(AMQPChannelHandler(false,
                     parent.allowedRemoteLegalNames,
+                    parent.userName,
+                    parent.password,
                     parent.trace,
-                    { parent._onConnected.onNext(true) },
-                    { parent._onConnected.onNext(false) },
+                    { parent._onConnection.onNext(it.second) },
+                    { parent._onConnection.onNext(it.second) },
                     { rcv -> parent._onReceive.onNext(rcv) }))
         }
 
@@ -105,7 +112,7 @@ class AMQPClient(val target: NetworkHostAndPort,
 
     fun start() {
         lock.withLock {
-            log.info("connect to: $target")
+            log.info("connect to: $currentTarget")
             workerGroup = NioEventLoopGroup()
             restart()
         }
@@ -116,13 +123,14 @@ class AMQPClient(val target: NetworkHostAndPort,
         bootstrap.group(workerGroup).
                 channel(NioSocketChannel::class.java).
                 handler(ClientChannelInitializer(this))
-        val clientFuture = bootstrap.connect(target.host, target.port)
+        currentTarget = targets[targetIndex]
+        val clientFuture = bootstrap.connect(currentTarget.host, currentTarget.port)
         clientFuture.addListener(connectListener)
     }
 
     fun stop() {
         lock.withLock {
-            log.info("disconnect from: $target")
+            log.info("disconnect from: $currentTarget")
             stopping = true
             try {
                 workerGroup?.shutdownGracefully()
@@ -131,7 +139,7 @@ class AMQPClient(val target: NetworkHostAndPort,
             } finally {
                 stopping = false
             }
-            log.info("stopped connection to $target")
+            log.info("stopped connection to $currentTarget")
         }
     }
 
@@ -147,13 +155,13 @@ class AMQPClient(val target: NetworkHostAndPort,
                       topic: String,
                       destinationLegalName: String,
                       properties: Map<Any?, Any?>): SendableMessage {
-        return SendableMessageImpl(payload, topic, destinationLegalName, target, properties)
+        return SendableMessageImpl(payload, topic, destinationLegalName, currentTarget, properties)
     }
 
     fun write(msg: SendableMessage) {
         val channel = clientChannel
         if (channel == null) {
-            throw IllegalStateException("Connection to $target not active")
+            throw IllegalStateException("Connection to $targets not active")
         } else {
             channel.writeAndFlush(msg)
         }
@@ -163,7 +171,8 @@ class AMQPClient(val target: NetworkHostAndPort,
     val onReceive: Observable<ReceivedMessage>
         get() = _onReceive
 
-    private val _onConnected = PublishSubject.create<Boolean>().toSerialized()
-    val onConnected: Observable<Boolean>
-        get() = _onConnected
+
+    private val _onConnection = PublishSubject.create<ConnectionChange>().toSerialized()
+    val onConnection: Observable<ConnectionChange>
+        get() = _onConnection
 }

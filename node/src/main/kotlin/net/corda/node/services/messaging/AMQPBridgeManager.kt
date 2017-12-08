@@ -10,6 +10,7 @@ import net.corda.node.services.config.NodeConfiguration
 import net.corda.node.services.messaging.AMQPBridgeManager.AMQPBridge.Companion.getBridgeName
 import net.corda.nodeapi.internal.ArtemisMessagingComponent
 import net.corda.nodeapi.internal.ArtemisMessagingComponent.Companion.NODE_USER
+import net.corda.nodeapi.internal.ArtemisMessagingComponent.Companion.PEER_USER
 import net.corda.nodeapi.internal.crypto.loadKeyStore
 import org.apache.activemq.artemis.api.core.SimpleString
 import org.apache.activemq.artemis.api.core.client.ActiveMQClient.DEFAULT_ACK_BATCH_SIZE
@@ -44,7 +45,7 @@ class AMQPBridgeManager(val config: NodeConfiguration, val p2pAddress: NetworkHo
 
         private val log = LoggerFactory.getLogger("$bridgeName:${legalNames.first()}")
 
-        val amqpClient = AMQPClient(target, legalNames, keyStore, keyStorePrivateKeyPassword, trustStore)
+        val amqpClient = AMQPClient(listOf(target), legalNames, PEER_USER, PEER_USER, keyStore, keyStorePrivateKeyPassword, trustStore)
         val bridgeName: String get() = getBridgeName(queueName, target)
         private val lock = ReentrantLock() // lock to serialise session level access
         private var session: ClientSession? = null
@@ -53,7 +54,7 @@ class AMQPBridgeManager(val config: NodeConfiguration, val p2pAddress: NetworkHo
 
         fun start() {
             log.info("Create new AMQP bridge")
-            connectedSubscription = amqpClient.onConnected.subscribe({ x -> onSocketConnected(x) })
+            connectedSubscription = amqpClient.onConnection.subscribe({ x -> onSocketConnected(x.connected) })
             amqpClient.start()
         }
 

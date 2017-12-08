@@ -21,7 +21,12 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-class EventProcessor(channel: Channel, serverMode: Boolean, localLegalName: String, remoteLegalName: String) : BaseHandler() {
+class EventProcessor(channel: Channel,
+                     serverMode: Boolean,
+                     localLegalName: String,
+                     remoteLegalName: String,
+                     userName: String?,
+                     password: String?) : BaseHandler() {
     companion object {
         const val FLOW_WINDOW_SIZE = 10
     }
@@ -32,7 +37,12 @@ class EventProcessor(channel: Channel, serverMode: Boolean, localLegalName: Stri
     private val executor: ScheduledExecutorService = channel.eventLoop()
     private val collector = Proton.collector() as CollectorImpl
     private val handlers = mutableListOf<Handler>()
-    private val stateMachine: ConnectionStateMachine = ConnectionStateMachine(serverMode, collector, localLegalName, remoteLegalName)
+    private val stateMachine: ConnectionStateMachine = ConnectionStateMachine(serverMode,
+            collector,
+            localLegalName,
+            remoteLegalName,
+            userName,
+            password)
 
     val connection: Connection = stateMachine.connection
 

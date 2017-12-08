@@ -9,7 +9,6 @@ import net.corda.core.utilities.NetworkHostAndPort
 import net.corda.node.internal.protonwrapper.messages.MessageStatus
 import net.corda.node.internal.protonwrapper.messages.impl.ReceivedMessageImpl
 import net.corda.node.internal.protonwrapper.messages.impl.SendableMessageImpl
-import net.corda.nodeapi.internal.ArtemisMessagingComponent.Companion.PEER_USER
 import org.apache.qpid.proton.Proton
 import org.apache.qpid.proton.amqp.Binary
 import org.apache.qpid.proton.amqp.Symbol
@@ -31,7 +30,9 @@ import java.util.*
 class ConnectionStateMachine(serverMode: Boolean,
                              collector: Collector,
                              val localLegalName: String,
-                             val remoteLegalName: String) : BaseHandler() {
+                             val remoteLegalName: String,
+                             userName: String?,
+                             password: String?) : BaseHandler() {
     companion object {
         private const val IDLE_TIMEOUT = 10000
     }
@@ -43,7 +44,7 @@ class ConnectionStateMachine(serverMode: Boolean,
     private var session: Session? = null
     private val messageQueues = mutableMapOf<String, LinkedList<SendableMessageImpl>>()
     private val unackedQueue = LinkedList<SendableMessageImpl>()
-    private val receivers = mutableListOf<Receiver>()
+    private val receivers = mutableMapOf<String, Receiver>()
     private val senders = mutableMapOf<String, Sender>()
     private var tagId: Int = 0
 
@@ -56,14 +57,25 @@ class ConnectionStateMachine(serverMode: Boolean,
         transport.setEmitFlowEventOnSend(true)
         connection.collect(collector)
         val sasl = transport.sasl()
-        //TODO This handshake is required for our queue permission logic in Artemis
-        sasl.setMechanisms("PLAIN")
-        sasl.plain(PEER_USER, PEER_USER)
-        if (serverMode) {
-            sasl.server()
-            sasl.done(Sasl.PN_SASL_OK)
+        if (userName != null) {
+            //TODO This handshake is required for our queue permission logic in Artemis
+            sasl.setMechanisms("PLAIN")
+            sasl.plain(userName, password)
+            if (serverMode) {
+                sasl.server()
+                sasl.done(Sasl.PN_SASL_OK)
+            } else {
+                sasl.client()
+            }
         } else {
-            sasl.client()
+            sasl.setMechanisms("ANONYMOUS")
+            if (serverMode) {
+                sasl.server()
+                sasl.done(Sasl.PN_SASL_OK)
+            } else {
+                sasl.client()
+            }
+
         }
         transport.bind(connection)
         if (!serverMode) {
@@ -252,7 +264,7 @@ class ConnectionStateMachine(serverMode: Boolean,
         }
         if (link is Receiver) {
             log.info("Receiver Link local open ${link.name} ${link.source} ${link.target}")
-            receivers += link
+            receivers[link.target.address] = link
         }
     }
 
@@ -273,7 +285,7 @@ class ConnectionStateMachine(serverMode: Boolean,
         }
         if (link is Receiver) {
             log.info("Receiver Link final ${link.name} ${link.source} ${link.target}")
-            receivers.remove(link)
+            receivers.remove(link.target.address)
         }
     }
 

@@ -32,6 +32,8 @@ import kotlin.concurrent.withLock
 
 class AMQPServer(val hostName: String,
                  val port: Int,
+                 val userName: String?,
+                 val password: String?,
                  keyStore: KeyStore,
                  keyStorePrivateKeyPassword: String,
                  trustStore: KeyStore,
@@ -68,14 +70,16 @@ class AMQPServer(val hostName: String,
             if (parent.trace) pipeline.addLast("logger", LoggingHandler(LogLevel.INFO))
             pipeline.addLast(AMQPChannelHandler(true,
                     null,
+                    parent.userName,
+                    parent.password,
                     parent.trace,
                     {
-                        parent.clientChannels.put(it.remoteAddress(), it)
-                        parent._onConnection.onNext(ConnectionChange(it.remoteAddress(), true))
+                        parent.clientChannels.put(it.first.remoteAddress(), it.first)
+                        parent._onConnection.onNext(it.second)
                     },
                     {
-                        parent.clientChannels.remove(it.remoteAddress())
-                        parent._onConnection.onNext(ConnectionChange(it.remoteAddress(), false))
+                        parent.clientChannels.remove(it.first.remoteAddress())
+                        parent._onConnection.onNext(it.second)
                     },
                     { rcv -> parent._onReceive.onNext(rcv) }))
         }
@@ -168,8 +172,6 @@ class AMQPServer(val hostName: String,
     val onReceive: Observable<ReceivedMessage>
         get() = _onReceive
 
-
-    data class ConnectionChange(val remoteAddress: InetSocketAddress, val connected: Boolean)
 
     private val _onConnection = PublishSubject.create<ConnectionChange>().toSerialized()
     val onConnection: Observable<ConnectionChange>
