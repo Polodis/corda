@@ -48,10 +48,7 @@ class NetworkRegistrationHelperTest {
                 .map { it.cert }.toTypedArray()
 
         val certService = mockRegistrationResponse(*certs)
-
-        config.rootCertFile.parent.createDirectories()
-        X509Utilities.saveCertificateAsPEMFile(certs.last(), config.rootCertFile)
-
+        
         assertFalse(config.nodeKeystore.exists())
         assertFalse(config.sslKeystore.exists())
         assertFalse(config.trustStoreFile.exists())
@@ -94,15 +91,6 @@ class NetworkRegistrationHelperTest {
             assertFalse(containsAlias(X509Utilities.CORDA_INTERMEDIATE_CA))
             assertTrue(containsAlias(X509Utilities.CORDA_ROOT_CA))
         }
-    }
-
-    @Test
-    fun `rootCertFile doesn't exist`() {
-        val certService = rigorousMock<NetworkRegistrationService>()
-
-        assertThatThrownBy {
-            NetworkRegistrationHelper(config, certService)
-        }.hasMessageContaining(config.rootCertFile.toString())
     }
 
     private fun mockRegistrationResponse(vararg response: Certificate): NetworkRegistrationService {
