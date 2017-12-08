@@ -28,18 +28,10 @@ class NetworkRegistrationHelper(private val config: NodeConfiguration, private v
         val SELF_SIGNED_PRIVATE_KEY = "Self Signed Private Key"
     }
 
-    init {
-        require(config.rootCertFile.exists()) {
-            "${config.rootCertFile} does not exist. This file must contain the root CA cert of your compatibility zone. " +
-                    "Please contact your CZ operator."
-        }
-    }
-
     private val requestIdStore = config.certificatesDirectory / "certificate-request-id.txt"
     private val keystorePassword = config.keyStorePassword
     // TODO: Use different password for private key.
     private val privateKeyPassword = config.keyStorePassword
-    private val rootCert = X509Utilities.loadCertificateFromPEMFile(config.rootCertFile)
 
     /**
      * Ensure the initial keystore for a node is set up; note that this function may cause the process to exit under

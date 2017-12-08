@@ -762,8 +762,9 @@ class DriverDSL(
         )
         val configuration = config.parseAsNodeConfiguration()
 
-        configuration.rootCertFile.parent.createDirectories()
-        X509Utilities.saveCertificateAsPEMFile(rootCert, configuration.rootCertFile)
+        configuration.trustStoreFile.parent.createDirectories()
+        //
+        //X509Utilities.saveCertificateAsPEMFile(rootCert, configuration.rootCertFile)
 
         return if (startNodesInProcess) {
             // This is a bit cheating, we're not starting a full node, we're just calling the code nodes call

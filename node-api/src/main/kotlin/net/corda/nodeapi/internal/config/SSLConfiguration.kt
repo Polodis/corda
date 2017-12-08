@@ -15,5 +15,4 @@ interface SSLConfiguration {
 interface NodeSSLConfiguration : SSLConfiguration {
     val baseDirectory: Path
     override val certificatesDirectory: Path get() = baseDirectory / "certificates"
-    val rootCertFile: Path get() = certificatesDirectory / "rootcert.pem"
 }
