@@ -2,7 +2,7 @@ package net.corda.nodeapi.internal.serialization
 
 import net.corda.core.contracts.ContractAttachment
 import net.corda.core.serialization.*
-import net.corda.testing.SerializationEnvironmentRule
+import net.corda.testing.*
 import net.corda.testing.contracts.DummyContract
 import net.corda.testing.node.MockAttachmentStorage
 import org.assertj.core.api.Assertions.assertThat
