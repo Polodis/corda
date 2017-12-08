@@ -37,16 +37,20 @@ A node's name must be a valid X.500 name that obeys the following additional con
 
 * The organisation, locality and country attributes are present
 
-* The organisation field of the name obeys the following constraints:
+* All attributes must obey the following constraints:
 
     * Has at least two letters
     * No leading or trailing whitespace
+    * Is in NFKC normalization form
+    * Does not contain the null character
+    * Does not include the characters ',' or '=' or '$' or '"' or '\'' or '\\'
+    * Only the latin, common and inherited unicode scripts are supported
+
+* The organisation field of the name also obeys the following constraints:
+
     * No double-spacing
     * Upper-case first letter
     * Does not contain the words "node" or "server"
-    * Does not include the characters ',' or '=' or '$' or '"' or '\'' or '\\'
-    * Is in NFKC normalization form
-    * Only the latin, common and inherited unicode scripts are supported
 
 The Cordform task
 -----------------
