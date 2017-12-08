@@ -66,9 +66,9 @@ class DriverTests {
         val handler = RegistrationHandler()
         NetworkMapServer(1.seconds, portAllocation.nextHostAndPort(), handler).use {
             val (host, port) = it.start()
-            driver(portAllocation = portAllocation, compatibilityZoneURL = URL("http://$host:$port")) {
+            internalDriver(portAllocation = portAllocation, compatibilityZone = CompatibilityZoneParams(URL("http://$host:$port"))) {
                 // Wait for the node to have started.
-                startNode(initialRegistration = true).get()
+                startNode().get()
             }
         }
         // We're getting:

@@ -105,30 +105,6 @@ class NetworkRegistrationHelperTest {
         }.hasMessageContaining(config.rootCertFile.toString())
     }
 
-    @Test
-    fun `root cert in response doesn't match expected`() {
-        val identities = listOf("CORDA_CLIENT_CA",
-                "CORDA_INTERMEDIATE_CA",
-                "CORDA_ROOT_CA")
-                .map { CordaX500Name(commonName = it, organisation = "R3 Ltd", locality = "London", country = "GB") }
-        val certs = identities.stream().map { X509Utilities.createSelfSignedCACertificate(it, Crypto.generateKeyPair(X509Utilities.DEFAULT_TLS_SIGNATURE_SCHEME)) }
-                .map { it.cert }.toTypedArray()
-
-        val certService = mockRegistrationResponse(*certs)
-
-        config.rootCertFile.parent.createDirectories()
-        X509Utilities.saveCertificateAsPEMFile(
-                X509Utilities.createSelfSignedCACertificate(
-                        CordaX500Name("CORDA_ROOT_CA", "R3 Ltd", "London", "GB"),
-                        Crypto.generateKeyPair(X509Utilities.DEFAULT_TLS_SIGNATURE_SCHEME)).cert,
-                config.rootCertFile
-        )
-
-        assertThatThrownBy {
-            NetworkRegistrationHelper(config, certService).buildKeystore()
-        }.isInstanceOf(WrongRootCertException::class.java)
-    }
-
     private fun mockRegistrationResponse(vararg response: Certificate): NetworkRegistrationService {
         return rigorousMock<NetworkRegistrationService>().also {
             doReturn(requestId).whenever(it).submitRequest(any())
