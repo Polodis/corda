@@ -50,7 +50,7 @@ class NodeRegistrationTest {
 
     @Before
     fun startServer() {
-        server = NetworkMapServer(1.minutes, portAllocation.nextHostAndPort(), registrationHandler)
+        server = NetworkMapServer(1.minutes, portAllocation.nextHostAndPort(), rootCertAndKeyPair, registrationHandler)
         val address = server.start()
         compatibilityZone = CompatibilityZoneParams(URL("http://$address"), rootCert = rootCertAndKeyPair.certificate.cert)
     }
