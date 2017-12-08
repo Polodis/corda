@@ -1,6 +1,9 @@
 package net.corda.testing.driver
 
 import net.corda.core.concurrent.CordaFuture
+import net.corda.core.crypto.Crypto
+import net.corda.core.identity.CordaX500Name
+import net.corda.core.internal.cert
 import net.corda.core.internal.div
 import net.corda.core.internal.list
 import net.corda.core.internal.readLines
@@ -8,6 +11,7 @@ import net.corda.core.utilities.getOrThrow
 import net.corda.core.utilities.minutes
 import net.corda.core.utilities.seconds
 import net.corda.node.internal.NodeStartup
+import net.corda.nodeapi.internal.crypto.X509Utilities
 import net.corda.testing.DUMMY_BANK_A
 import net.corda.testing.DUMMY_NOTARY
 import net.corda.testing.DUMMY_REGULATOR
@@ -64,9 +68,14 @@ class DriverTests {
     @Test
     fun `node registration`() {
         val handler = RegistrationHandler()
+        val name = CordaX500Name(commonName = "Test", organisation = "R3 Ltd", locality = "London", country = "GB")
+        val selfSignedCert = X509Utilities.createSelfSignedCACertificate(name,
+                Crypto.generateKeyPair(X509Utilities.DEFAULT_TLS_SIGNATURE_SCHEME))
+
         NetworkMapServer(1.seconds, portAllocation.nextHostAndPort(), handler).use {
             val (host, port) = it.start()
-            internalDriver(portAllocation = portAllocation, compatibilityZone = CompatibilityZoneParams(URL("http://$host:$port"))) {
+            internalDriver(portAllocation = portAllocation,
+                    compatibilityZone = CompatibilityZoneParams(URL("http://$host:$port"), rootCert = selfSignedCert.cert)) {
                 // Wait for the node to have started.
                 startNode().get()
             }
